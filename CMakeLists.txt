@@ -45,8 +45,12 @@ build_loadable_extension(${TARGET_NAME} " " ${EXTENSION_SOURCES})
 # Create list of libraries in correct order for static linking
 set(STATIC_LIBS
     ${WVLET_STATIC_PATH}
+    -Wl,--whole-archive
     OpenSSL::Crypto
     OpenSSL::SSL
+    -Wl,--no-whole-archive
+    -ldl
+    -pthread
 )
 
 # For static extension, use static library with correct link order
