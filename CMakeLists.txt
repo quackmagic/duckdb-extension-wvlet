@@ -44,27 +44,34 @@ build_loadable_extension(${TARGET_NAME} " " ${EXTENSION_SOURCES})
 
 # Create list of libraries in correct order for static linking
 set(STATIC_LIBS
+    -Wl,--whole-archive
     ${WVLET_STATIC_PATH}
+    -Wl,--no-whole-archive
+    # Runtime dependencies
+    ${CMAKE_DL_LIBS}
+    -pthread
     OpenSSL::Crypto
     OpenSSL::SSL
 )
 
 # For static extension, use static library with correct link order
 target_link_libraries(${EXTENSION_NAME} 
-    ${WVLET_DYNAMIC_PATH}
+#    ${WVLET_DYNAMIC_PATH}
     ${STATIC_LIBS}
 )
 
 # For loadable extension, use dynamic library
-target_link_libraries(${LOADABLE_EXTENSION_NAME} 
-    OpenSSL::SSL 
-    OpenSSL::Crypto 
+target_link_libraries(${LOADABLE_EXTENSION_NAME}
+    OpenSSL::SSL
+    OpenSSL::Crypto
     ${WVLET_DYNAMIC_PATH}
 )
 
 # Set link flags to ensure proper symbol resolution
 set_target_properties(${EXTENSION_NAME} PROPERTIES
-    LINK_FLAGS "-Wl,--no-as-needed"
+    LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic"
+    ENABLE_EXPORTS ON
+    POSITION_INDEPENDENT_CODE ON
 )
 
 install(

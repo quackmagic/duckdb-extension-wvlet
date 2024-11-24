@@ -10,12 +10,41 @@
 #include <sstream>
 #include <stdexcept>
 
+#ifdef __cplusplus
 extern "C" {
-    int wvlet_compile_main(const char*);
-    const char* wvlet_compile_compile(const char*);
+#endif
+    extern int ScalaNativeInit(void);
+
+    extern int wvlet_compile_main(const char*);
+    extern const char* wvlet_compile_compile(const char*);
+
+#ifdef __cplusplus
 }
+#endif
 
 namespace duckdb {
+
+// EXPERIMENT INIT
+bool InitializeWvletRuntime() {
+    try {
+        // Set heap sizes via environment variables
+        setenv("GC_INITIAL_HEAP_SIZE", "2097152", 1);  // 64MB
+        setenv("GC_MAXIMUM_HEAP_SIZE", "8388608", 1); // 256MB
+        
+        // fprintf(stderr, "Initializing Scala Native Runtime...\n");
+        int init_result = ScalaNativeInit();
+        if (init_result != 0) {
+            fprintf(stderr, "Failed to initialize Scala Native Runtime: %d\n", init_result);
+            return false;
+        }
+        
+        // fprintf(stderr, "Scala Native Runtime initialized successfully!\n");
+        return true;
+    } catch (...) {
+        fprintf(stderr, "Scala Runtime Initialization failed with exception!\n");
+        return false;
+    }
+}
 
 void WvletScriptFunction::ParseWvletScript(DataChunk &args, ExpressionState &state, Vector &result) {
     auto &input_vector = args.data[0];
@@ -130,6 +159,10 @@ static void LoadInternal(DatabaseInstance &instance) {
 
 void WvletExtension::Load(DuckDB &db) {
     LoadInternal(*db.instance);
+    // EXPERIMENT
+    if (!InitializeWvletRuntime()) {
+        throw std::runtime_error("Failed to initialize Wvlet runtime");
+    }
 }
 
 std::string WvletExtension::Name() {
