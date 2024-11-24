@@ -42,17 +42,6 @@ unique_ptr<FunctionData> WvletScriptFunction::Bind(ClientContext &context, Scala
     return nullptr;
 }
 
-static std::string CleanSQL(const std::string& sql) {
-    // Find first occurrence of "select" (case insensitive)
-    std::string lower_sql = sql;
-    std::transform(lower_sql.begin(), lower_sql.end(), lower_sql.begin(), ::tolower);
-    auto pos = lower_sql.find("select");
-    if (pos == std::string::npos) {
-        throw std::runtime_error("No SELECT statement found in compiled SQL");
-    }
-    return sql.substr(pos);
-}
-
 static unique_ptr<FunctionData> WvletBind(ClientContext &context, TableFunctionBindInput &input,
                                         vector<LogicalType> &return_types, vector<string> &names) {
     auto result = make_uniq<WvletBindData>();
@@ -67,12 +56,7 @@ static unique_ptr<FunctionData> WvletBind(ClientContext &context, TableFunctionB
         throw std::runtime_error("Failed to compile wvlet script");
     }
     
-    // Store the compiled SQL query
     result->query = std::string(sql_result);
-
-    // Set dummy type and name - will be updated during execution
-    // return_types.push_back(LogicalType::INTEGER);
-    // names.push_back("value");
 
     // Create a temporary connection to execute the query and get the schema
     Connection conn(*context.db);
