@@ -25,14 +25,7 @@ void WvletScriptFunction::ParseWvletScript(DataChunk &args, ExpressionState &sta
         string query = input[i].GetString();
         std::string json = "[\"-q\", \"" + query + "\"]";
         
-        // std::cout << "Input wvlet: " << query << std::endl;
-        
-        // Initialize wvlet compiler
-        // wvlet_compile_main(json.c_str());
-        
-        // Get compiled SQL
         const char* sql_result = wvlet_compile_query(json.c_str());
-        // std::cout << "Compiled SQL: " << sql_result << std::endl;
 
         if (!sql_result || strlen(sql_result) == 0) {
             throw std::runtime_error("Failed to compile wvlet script");
@@ -66,16 +59,9 @@ static unique_ptr<FunctionData> WvletBind(ClientContext &context, TableFunctionB
     result->query = input.inputs[0].GetValue<string>();
     
     std::string json = "[\"-q\", \"" + result->query + "\"]";
-    // std::cout << "Input wvlet: " << result->query << std::endl;
     
-    // Initialize wvlet compiler
-    // std::cout << "Calling wvlet_compile_main..." << std::endl;
     wvlet_compile_main(json.c_str());
-    
-    // Get compiled SQL
-    // std::cout << "Calling wvlet_compile_query..." << std::endl;
     const char* sql_result = wvlet_compile_query(json.c_str());
-    // std::cout << "Compiled SQL: " << sql_result << std::endl;
 
     if (!sql_result || strlen(sql_result) == 0) {
         throw std::runtime_error("Failed to compile wvlet script");
@@ -84,50 +70,66 @@ static unique_ptr<FunctionData> WvletBind(ClientContext &context, TableFunctionB
     // Store the compiled SQL query
     result->query = std::string(sql_result);
 
-    // For t1, we know it has two INTEGER columns
-    return_types = {LogicalType::INTEGER, LogicalType::INTEGER};
-    names = {"i", "j"};
+    // Set dummy type and name - will be updated during execution
+    // return_types.push_back(LogicalType::INTEGER);
+    // names.push_back("value");
 
-    // std::cout << "Bind complete with query: " << result->query << std::endl;
+    // Create a temporary connection to execute the query and get the schema
+    Connection conn(*context.db);
+    auto result_set = conn.Query(result->query);
+
+    if (result_set->HasError()) {
+        throw std::runtime_error(result_set->GetError());
+    }
+
+    // Get the types and names of the columns from the result set
+    for (auto &column : result_set->types) {
+        return_types.push_back(column);
+    }
+    for (auto &name : result_set->names) {
+        names.push_back(name);
+    }
+
     return std::move(result);
 }
 
 static void WvletFunction(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {
     auto &bind_data = data_p.bind_data->Cast<WvletBindData>();
     
-    if (!bind_data.query_result->initialized) {
-        // std::cout << "Starting query execution..." << std::endl;
-        
-        // Use a new connection with the existing database instance
-        Connection conn(*context.db);
-        
-        // std::cout << "Executing query: " << bind_data.query << std::endl;
-        auto result = conn.Query(bind_data.query);
-        
-        if (result->HasError()) {
-            throw std::runtime_error(result->GetError());
-        }
-        
-        bind_data.query_result->result = std::move(result);
-        bind_data.query_result->initialized = true;
-        
-        // Initialize output with INTEGER types to match t1
-        output.Initialize(Allocator::DefaultAllocator(), {LogicalType::INTEGER, LogicalType::INTEGER});
-        // std::cout << "Query initialized successfully" << std::endl;
+    if (!bind_data.query_result) {
+        throw std::runtime_error("query_result is nullptr");
     }
     
-    // Fetch next chunk
-    // std::cout << "Fetching chunk..." << std::endl;
+    if (!bind_data.query_result->initialized) {
+        
+        try {
+            Connection conn(*context.db);
+            
+            auto result = conn.Query(bind_data.query);
+            
+            if (result->HasError()) {
+                throw std::runtime_error(result->GetError());
+            }
+            
+            bind_data.query_result->result = std::move(result);
+            bind_data.query_result->initialized = true;
+            
+            auto &types = bind_data.query_result->result->types;
+            
+            output.Destroy();  // Clean up the existing chunk
+            output.Initialize(context, types);  // Initialize with actual types
+        } catch (const std::exception &e) {
+            throw;
+        }
+    }
+    
     auto chunk = bind_data.query_result->result->Fetch();
-    // std::cout << "Chunk fetched" << std::endl;
     
     if (!chunk || chunk->size() == 0) {
-        // std::cout << "No more data" << std::endl;
         output.SetCardinality(0);
         return;
     }
     
-    // std::cout << "Got chunk with " << chunk->size() << " rows" << std::endl;
     output.Reference(*chunk);
     output.SetCardinality(chunk->size());
 }
