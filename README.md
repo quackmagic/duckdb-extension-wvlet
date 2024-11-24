@@ -1,7 +1,9 @@
 <img src="https://github.com/user-attachments/assets/46a5c546-7e9b-42c7-87f4-bc8defe674e0" width=250 />
 
 # DuckDB [wvlet](https://wvlet.org/) Community Extension
-[Wvlet](https://wvlet.org/) a cross-SQL flow-style query language for functional data modeling and interactive data analysis. This extension binds libwvlet to convert and execute scripts directly through DuckDB SQL.
+[Wvlet](https://wvlet.org/) a cross-SQL flow-style query language for functional data modeling and interactive data analysis. 
+
+This extension adds support for executing **wvlet** scripts directly through DuckDB SQL.
 
 ### Example
 ```sql
@@ -39,7 +41,7 @@ select * from t1
 
 ### Status
 
-- Unstable
-- Depends on [libwvlet.so](https://github.com/quackmagic/wvlet-lib/releases/tag/nightly) Linux/x86
+- Experimental + Unstable
+- Depends on a custom [libwvlet](https://github.com/quackmagic/wvlet-lib/releases/tag/nightly)
+- Tests welcome, no warranties!
   
-> Experimental: USE AT YOUR OWN RISK!
