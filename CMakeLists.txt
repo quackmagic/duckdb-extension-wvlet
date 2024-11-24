@@ -55,7 +55,7 @@ set(STATIC_LIBS
 
 # For static extension, use static library with correct link order
 target_link_libraries(${EXTENSION_NAME} 
-    ${WVLET_DYNAMIC_PATH}
+#    ${WVLET_DYNAMIC_PATH}
     ${STATIC_LIBS}
 )
 
