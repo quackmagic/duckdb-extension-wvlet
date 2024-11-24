@@ -5,7 +5,7 @@
 
 This extension adds support for executing **wvlet** scripts directly through DuckDB SQL.
 
-### Example
+### Examples
 ```sql
 D SELECT * FROM wvlet('select 1');
 -- wvlet version=0.0.0+1-e9ceb08b+20241124-0132, src=01JDF4E4BK6RA89RB7RTN4V0NV.wv:1
@@ -16,6 +16,7 @@ select 1
 ├───────┤
 │     1 │
 └───────┘
+
 D SELECT * FROM wvlet('select version()');
 -- wvlet version=0.0.0+1-e9ceb08b+20241124-0132, src=01JDF4E6NJ94JG6D5K95REX3S2.wv:1
 select version() 
@@ -25,6 +26,7 @@ select version()
 ├─────────────┤
 │ v1.1.3      │
 └─────────────┘
+
 D CREATE TABLE t1 AS SELECT 42 AS i, 84 AS j;
 D SELECT * FROM wvlet('from t1');
 -- wvlet version=0.0.0+1-e9ceb08b+20241124-0132, src=01JDF4ECWR417HJQNG1GSHCGH0.wv:1
