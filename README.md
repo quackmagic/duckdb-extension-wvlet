@@ -1,8 +1,9 @@
 <img src="https://github.com/user-attachments/assets/46a5c546-7e9b-42c7-87f4-bc8defe674e0" width=250 />
 
-# DuckDB WVlet Extension
-experimental community extension binding fow [wvlet](https://wvlet.org/) a cross-SQL flow-style query language for functional data modeling and interactive data analysis. 
+# DuckDB [wvlet](https://wvlet.org/) Community Extension
+[Wvlet](https://wvlet.org/) a cross-SQL flow-style query language for functional data modeling and interactive data analysis. This extension binds libwvlet to convert and execute scripts directly through DuckDB SQL.
 
+### Example
 ```sql
 D SELECT * FROM wvlet('select 1');
 -- wvlet version=0.0.0+1-e9ceb08b+20241124-0132, src=01JDF4E4BK6RA89RB7RTN4V0NV.wv:1
@@ -38,6 +39,7 @@ select * from t1
 
 ### Status
 
-- Work in progress
-
+- Unstable
+- Depends on [libwvlet.so](https://github.com/quackmagic/wvlet-lib/releases/tag/nightly) Linux/x86
+  
 > Experimental: USE AT YOUR OWN RISK!
