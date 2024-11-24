@@ -4,17 +4,23 @@ set(TARGET_NAME wvlet)
 find_package(OpenSSL REQUIRED)
 
 # Detect system and architecture
-message(STATUS "Detecting system and architecture...")
+execute_process(
+    COMMAND uname -m
+    OUTPUT_VARIABLE SYSTEM_ARCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message(STATUS "Detected architecture: ${SYSTEM_ARCH}")
+
+# Determine libraries for detected system and architecture
 set(WVLET_STATIC_URL "")
 set(WVLET_DYNAMIC_URL "")
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    if(SYSTEM_ARCH STREQUAL "x86_64")
         set(WVLET_STATIC_URL "https://github.com/quackmagic/wvlet-lib/releases/download/latest/linux-x64_libwvlet.a")
         set(WVLET_STATIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux-x64_libwvlet.a")
         set(WVLET_DYNAMIC_URL "https://github.com/quackmagic/wvlet-lib/releases/download/latest/linux-x64_libwvlet.so")
         set(WVLET_DYNAMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux-x64_libwvlet.so")
-    elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    elseif(SYSTEM_ARCH STREQUAL "aarch64" OR SYSTEM_ARCH STREQUAL "arm64")
         set(WVLET_STATIC_URL "https://github.com/quackmagic/wvlet-lib/releases/download/latest/linux-arm64_libwvlet.a")
         set(WVLET_STATIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux-arm64_libwvlet.a")
         set(WVLET_DYNAMIC_URL "https://github.com/quackmagic/wvlet-lib/releases/download/latest/linux-arm64_libwvlet.so")
@@ -28,9 +34,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 else()
     message(FATAL_ERROR "Unsupported system: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
-
-# (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
-# (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
 # Function to download library if it doesn't exist
 function(download_library url path)
