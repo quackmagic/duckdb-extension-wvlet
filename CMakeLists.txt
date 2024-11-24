@@ -42,11 +42,20 @@ set(EXTENSION_SOURCES src/wvlet_extension.cpp)
 build_static_extension(${TARGET_NAME} ${EXTENSION_SOURCES})
 build_loadable_extension(${TARGET_NAME} " " ${EXTENSION_SOURCES})
 
-# For static extension, use static library
-target_link_libraries(${EXTENSION_NAME} 
-    OpenSSL::SSL 
-    OpenSSL::Crypto 
+# Create list of libraries in correct order for static linking
+set(STATIC_LIBS
     ${WVLET_STATIC_PATH}
+    -Wl,--whole-archive
+    OpenSSL::Crypto
+    OpenSSL::SSL
+    -Wl,--no-whole-archive
+    -ldl
+    -pthread
+)
+
+# For static extension, use static library with correct link order
+target_link_libraries(${EXTENSION_NAME} 
+    ${STATIC_LIBS}
 )
 
 # For loadable extension, use dynamic library
@@ -54,6 +63,11 @@ target_link_libraries(${LOADABLE_EXTENSION_NAME}
     OpenSSL::SSL 
     OpenSSL::Crypto 
     ${WVLET_DYNAMIC_PATH}
+)
+
+# Set link flags to ensure proper symbol resolution
+set_target_properties(${EXTENSION_NAME} PROPERTIES
+    LINK_FLAGS "-Wl,--no-as-needed"
 )
 
 install(
