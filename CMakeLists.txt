@@ -27,7 +27,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(WVLET_STATIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux-arm64_libwvlet.a")
         set(WVLET_DYNAMIC_URL "https://github.com/quackscience/wvlet-lib/releases/download/latest/linux-arm64_libwvlet.so")
         set(WVLET_DYNAMIC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third-party/linux-arm64_libwvlet.so")
-        string(APPEND _GNU_COMMON_C_CXX_FLAGS " -mno-outline-atomics")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(WVLET_STATIC_URL "https://github.com/quackscience/wvlet-lib/releases/download/latest/mac-arm64_libwvlet.a")
@@ -81,6 +80,11 @@ set(STATIC_LIBS
     OpenSSL::Crypto
     OpenSSL::SSL
 )
+
+if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux")
+  string(APPEND _GNU_COMMON_C_CXX_FLAGS " -mno-outline-atomics")
+  list(APPEND STATIC_LIBS atomic)
+endif()
 
 # For static extension, use static library with correct link order
 target_link_libraries(${EXTENSION_NAME} 
