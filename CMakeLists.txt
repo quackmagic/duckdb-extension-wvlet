@@ -82,7 +82,10 @@ set(STATIC_LIBS
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
   find_library(LIBATOMIC NAMES atomic)
   if(LIBATOMIC)
+    message(STATUS "libatomic found at ${LIBATOMIC}")
     list(APPEND STATIC_LIBS ${LIBATOMIC})
+  else()
+    message(FATAL_ERROR "libatomic not found")
   endif()
 endif()
 
