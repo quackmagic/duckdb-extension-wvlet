@@ -13,6 +13,6 @@ require wvlet
 
 # Confirm the extension works
 query I
-select 1;
+from [[1]] as numbers(a)
 ----
 1
