@@ -79,9 +79,11 @@ set(STATIC_LIBS
     OpenSSL::SSL
 )
 
-if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux")
-  string(APPEND _GNU_COMMON_C_CXX_FLAGS " -mno-outline-atomics")
-  list(APPEND STATIC_LIBS atomic)
+if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
+  find_library(LIBATOMIC NAMES atomic)
+  if(LIBATOMIC)
+    list(APPEND STATIC_LIBS ${LIBATOMIC})
+  endif()
 endif()
 
 # For static extension, use static library with correct link order
