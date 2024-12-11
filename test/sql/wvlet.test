@@ -13,6 +13,6 @@ require wvlet
 
 # Confirm the extension works
 query I
-SELECT * FROM wvlet('select 1');
+select 1;
 ----
 1
