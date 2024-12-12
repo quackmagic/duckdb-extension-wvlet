@@ -81,6 +81,13 @@ set(STATIC_LIBS
 
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
     list(APPEND STATIC_LIBS "atomic")
+    # Use pkg-config to find and link libatomic-ops
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(ATOMIC_OPS REQUIRED atomic_ops)
+    if(ATOMIC_OPS_FOUND)
+      message(STATUS "libatomic-ops found by pkg-config")
+      include_directories(${ATOMIC_OPS_INCLUDE_DIRS})
+    endif()
 endif()
 
 # For static extension, use static library with correct link order
@@ -98,7 +105,6 @@ target_link_libraries(${LOADABLE_EXTENSION_NAME}
 
 # Set link flags to ensure proper symbol resolution
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
-    list(APPEND STATIC_LIBS "atomic")
     set_target_properties(${EXTENSION_NAME} PROPERTIES
         LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic -latomic"
     )
