@@ -81,15 +81,6 @@ set(STATIC_LIBS
 
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
     list(APPEND STATIC_LIBS "atomic")
-    # Use pkg-config to find and link libatomic-ops
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(ATOMIC_OPS REQUIRED atomic_ops)
-    if(ATOMIC_OPS_FOUND)
-      message(STATUS "libatomic-ops found by pkg-config")
-      include_directories(${ATOMIC_OPS_INCLUDE_DIRS})
-      link_directories(${ATOMIC_OPS_LIBRARY_DIRS})
-      list(APPEND STATIC_LIBS ${ATOMIC_OPS_LIBRARIES})
-    endif()
 endif()
 
 # For static extension, use static library with correct link order
