@@ -97,11 +97,16 @@ target_link_libraries(${LOADABLE_EXTENSION_NAME}
 )
 
 # Set link flags to ensure proper symbol resolution
-set_target_properties(${EXTENSION_NAME} PROPERTIES
-    LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic"
-    ENABLE_EXPORTS ON
-    POSITION_INDEPENDENT_CODE ON
-)
+if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
+    list(APPEND STATIC_LIBS "atomic")
+    set_target_properties(${EXTENSION_NAME} PROPERTIES
+        LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic -latomic"
+    )
+else()
+    set_target_properties(${EXTENSION_NAME} PROPERTIES
+        LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic"
+    )
+endif()
 
 install(
     TARGETS ${EXTENSION_NAME}
