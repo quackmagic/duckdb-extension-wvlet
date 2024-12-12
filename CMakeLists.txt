@@ -82,7 +82,6 @@ set(STATIC_LIBS
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
   find_package(Atomic_ops CONFIG REQUIRED)
   find_library(LIBATOMIC NAMES atomic)
-  target_link_libraries(main PRIVATE Atomic_ops::atomic_ops Atomic_ops::atomic_ops_gpl)
   if(Atomic_ops)
     message(STATUS "Atomic_ops found")
     list(APPEND STATIC_LIBS Atomic_ops::atomic_ops Atomic_ops::atomic_ops_gpl)
