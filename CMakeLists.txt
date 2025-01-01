@@ -106,7 +106,7 @@ target_link_libraries(${LOADABLE_EXTENSION_NAME}
 # Set link flags to ensure proper symbol resolution
 if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux" OR SYSTEM_ARCH MATCHES ".*(arm64|aarch64).*")
     set_target_properties(${EXTENSION_NAME} PROPERTIES
-        LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic -latomic"
+        LINK_FLAGS "-Wl,--no-as-needed -Wl,-z,now -Wl,--export-dynamic" # -latomic
     )
 else()
     set_target_properties(${EXTENSION_NAME} PROPERTIES
